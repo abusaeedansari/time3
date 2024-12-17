@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Telling Time Challenge</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: "Open Sans", sans-serif;
+    background: linear-gradient(to bottom right, #ffecd2, #fcb69f);
+    margin: 0; padding: 0; color: #333;
+  }
+  header {
+    background: #f76c6c; color: #fff; padding: 20px; text-align: center; margin-bottom: 40px;
+  }
+  header h1 {
+    margin: 0; font-size: 2.2em; font-family: "Space Mono", monospace; letter-spacing: 1px;
+  }
+  .container {
+    max-width: 700px; margin: 20px auto; background: #fff; border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 20px; margin-bottom: 40px;
+  }
+  .intro, .quiz-area, .result-area { display: none; }
+  .active { display: block; }
+  .intro p {
+    font-size: 1.2em; text-align: left; line-height:1.6em;
+  }
+  .name-input { margin: 20px 0; }
+  input[type="text"] {
+    padding: 10px; width: 100%; box-sizing: border-box;
+    margin-bottom: 15px; border: 1px solid #aaa; border-radius: 5px; font-size: 1.1em;
+  }
+  .button {
+    background: #f76c6c; color: #fff; padding: 12px 24px; border: none; border-radius:5px;
+    cursor: pointer; font-size: 1.1em; margin: 5px 0; display: inline-block; font-family:"Space Mono", monospace;
+    transition: background 0.3s ease; text-align:center;
+  }
+  .button:hover { background: #ee5a5a; }
+  .top-info {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom:20px;
+  }
+  .timer, .scoreboard {
+    font-size: 1.1em; font-weight: bold; color: #f76c6c; font-family:"Space Mono", monospace;
+  }
+  .question-count {
+    font-weight: bold; margin-bottom: 10px; font-size: 1.2em; text-align:center; font-family:"Space Mono", monospace; color:#333;
+  }
+  .question-text {
+    margin-bottom: 20px; font-size: 1.3em; text-align:center; font-weight:bold; font-family:"Space Mono", monospace; color:#333;
+  }
+  .answers { margin-bottom: 20px; }
+  .answers label {
+    display: block; margin-bottom:10px; font-size:1.1em; cursor: pointer;
+    background: #fafafa; padding:10px; border-radius:5px; transition:background 0.3s ease; border:1px solid #ddd;
+  }
+  .answers label:hover { background:#f6e6e6; }
+  .answers input[type=radio] { margin-right:8px; }
+  .feedback {
+    font-size:1.1em; margin-bottom:20px; padding:10px; border-radius:5px; text-align:center; font-weight:bold;
+  }
+  .feedback.correct {
+    background:#d5f8d0; border:1px solid #9ed98b; color:#333;
+  }
+  .feedback.incorrect {
+    background:#fcdcdc; border:1px solid #e5a5a5; color:#333;
+  }
+  .explanation {
+    font-size:1.1em; margin-bottom:20px; text-align:center; font-style: italic; color:#555;
+  }
+  .hidden { display:none; }
+  .result-area h2 {
+    font-size:1.8em; text-align:center; font-family:"Space Mono", monospace; margin-bottom:20px;
+  }
+  .result-area p {
+    font-size:1.2em; text-align:center; line-height:1.5em;
+  }
+  footer {
+    text-align:center; color:#030303; margin:20px 0; font-size:1em; font-family:"Open Sans", sans-serif;
+  }
+  .clock-wrapper {
+    width:200px; height:200px; margin:20px auto; position:relative;
+  }
+  .fill-in-wrapper, .matching-wrapper, .reverse-fill-in-wrapper { text-align:center; margin:20px 0; }
+  .fill-in-wrapper input[type="text"], .reverse-fill-in-wrapper input[type="text"] {
+    font-size:1.1em; border:1px solid #ddd; padding:5px; border-radius:5px; text-align:center; width:100px;
+    margin-top:10px;
+  }
+  .matching-options {
+    display:flex; justify-content:space-around; flex-wrap:wrap; margin-top:20px;
+  }
+  .matching-option {
+    background:#fafafa; padding:10px; border-radius:5px; margin:5px; border:1px solid #ddd; cursor:pointer; transition:background 0.3s ease;
+    text-align:center; width:80px; font-size:1.1em; font-family:"Open Sans", sans-serif;
+  }
+  .matching-option:hover { background:#f6e6e6; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Telling Time Challenge</h1>
+</header>
+
+<div class="container">
+  <div class="intro active" id="intro">
+    <h2 style="font-family:'Space Mono', monospace; font-size: 1.6em; text-align:center;">Welcome!</h2>
+    <p>
+      This quiz tests your ability to read time on analog clocks at five-minute intervals and understand time both in digital and in words!<br><br>
+      We have multiple types of questions to make it fun and challenging:<br>
+      - Multiple-choice (easy & challenging)<br>
+      - Fill-in (given a clock, type the digital time)<br>
+      - Matching (given a phrase, pick the correct digital time)<br>
+      - Reverse fill-in (given digital time, type the phrase in words)<br><br>
+
+      We accept multiple correct phrases. For times past 30 minutes, for example "06:35", both "25 minutes to 7" and "35 minutes past 6" are accepted!<br><br>
+      There are 100 random questions in total and you have 23 minutes. Good luck!
+    </p>
+    <div class="name-input">
+      <input type="text" id="playerName" placeholder="Your Name" />
+    </div>
+    <button class="button" onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div class="quiz-area" id="quiz-area">
+    <div class="top-info">
+      <div class="timer" id="timer">Time: 23:00</div>
+      <div class="scoreboard" id="scoreboard">Score: 0</div>
+    </div>
+    <div class="question-count" id="question-count"></div>
+    <div id="clock-area"></div>
+    <div class="question-text" id="question-text"></div>
+
+    <div class="answers hidden" id="answers"></div>
+    <div class="fill-in-wrapper hidden" id="fill-in-wrapper">
+      <input type="text" id="fillInInput" value=":" placeholder="HH:MM">
+    </div>
+    <div class="matching-wrapper hidden" id="matching-wrapper">
+      <div class="matching-options" id="matching-options"></div>
+    </div>
+    <div class="reverse-fill-in-wrapper hidden" id="reverse-fill-in-wrapper">
+      <p>Type the phrase (e.g. "quarter past 2"):</p>
+      <input type="text" id="reverseFillInInput" placeholder="e.g. quarter past 2">
+    </div>
+
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="explanation hidden" id="explanation"></div>
+    <button class="button" id="submitBtn" onclick="submitAnswer()">Check Answer</button>
+    <button class="button hidden" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+  </div>
+
+  <div class="result-area" id="result-area">
+    <h2>Quiz Completed!</h2>
+    <p id="final-message"></p>
+    <p id="final-score"></p>
+    <p>Thank you for playing! Keep practicing and have fun!</p>
+  </div>
+</div>
+
+<footer>
+  <p>All the best!</p>
+</footer>
+
+<script>
+// 5-minute increments:
+const fiveMinuteIncrements = [0,5,10,15,20,25,30,35,40,45,50,55];
+
+function randomChoice(arr) {
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function shuffleArray(array) {
+  for (let i = array.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [array[i], array[j]]=[array[j], array[i]];
+  }
+}
+
+function formatTime(hour, min) {
+  let hh = hour<10?"0"+hour:hour;
+  let mm = min<10?"0"+min:min;
+  return hh+":"+mm;
+}
+
+// Generate synonyms including both "past" and "to" forms for >30.
+function generateSynonyms(hour, minutes) {
+  let nextHour = (hour % 12) + 1;
+
+  let zeroMin = [hour + " o'clock", "0 minutes past " + hour];
+  let quarterPast = ["quarter past " + hour, "15 minutes past " + hour];
+  let halfPast = ["half past " + hour, "30 minutes past " + hour];
+  let quarterTo = ["quarter to " + nextHour, "15 minutes to " + nextHour];
+
+  if(minutes === 0) return zeroMin;
+  if(minutes === 15) return quarterPast;
+  if(minutes === 30) return halfPast;
+  if(minutes === 45) {
+    // For 45 minutes past hour, add also "45 minutes past hour" if user wants that form:
+    return quarterTo.concat([minutes+" minutes past "+hour]); 
+  }
+
+  if(minutes<30) {
+    // Just "X minutes past hour"
+    return [minutes+" minutes past "+hour];
+  } else {
+    let toMin = 60 - minutes;
+    // For >30, we accept both "X minutes past hour" and "Y minutes to nextHour"
+    // Example: 35 min past 6 could be "35 minutes past 6" or "25 minutes to 7"
+    return [toMin + " minutes to " + nextHour, minutes+" minutes past "+hour];
+  }
+}
+
+// Picks one representation at random
+function randomTimePhrase(hour, minutes) {
+  let syn = generateSynonyms(hour,minutes);
+  return randomChoice(syn);
+}
+
+// Check if user's answer matches any synonym
+function checkSynonymMatch(userInput, correctHour, correctMinutes) {
+  userInput = userInput.trim().toLowerCase();
+  let synonyms = generateSynonyms(correctHour, correctMinutes).map(s=>s.toLowerCase());
+  return synonyms.includes(userInput);
+}
+
+// Question generators:
+
+// Multiple-choice question
+function generateMultipleChoiceQuestion(moreChallenging=false) {
+  let incrementsPool = moreChallenging ? [5,10,20,25,35,40,50,55] : fiveMinuteIncrements;
+  let hour = Math.floor(Math.random()*12)+1;
+  let m = randomChoice(incrementsPool);
+  let correct = randomTimePhrase(hour,m);
+  let options = [correct];
+  while(options.length<4) {
+    let rh = Math.floor(Math.random()*12)+1;
+    let rm = randomChoice(fiveMinuteIncrements);
+    let o = randomTimePhrase(rh, rm);
+    if(!options.includes(o)) options.push(o);
+  }
+  shuffleArray(options);
+  return {
+    type: "multiple-choice",
+    hour: hour,
+    minutes: m,
+    question: "What time is shown on the clock?",
+    options: options,
+    correctIndex: options.indexOf(correct),
+    explanation: "Possible correct phrases are: " + generateSynonyms(hour,m).join(" or ") + "."
+  };
+}
+
+// Fill-in question: given a clock, type HH:MM
+function generateFillInQuestion() {
+  let hour = Math.floor(Math.random()*12)+1;
+  let m = randomChoice(fiveMinuteIncrements);
+  let correct = formatTime(hour,m);
+  return {
+    type: "fill-in",
+    hour: hour,
+    minutes: m,
+    question: "Fill in the time shown on the clock (HH:MM format).",
+    correctAnswer: correct,
+    explanation: "The correct time is " + correct + "."
+  };
+}
+
+// Matching question: given a phrase, pick correct HH:MM
+function generateMatchingQuestion() {
+  let hour = Math.floor(Math.random()*12)+1;
+  let m = randomChoice(fiveMinuteIncrements);
+  let phrase = randomTimePhrase(hour,m);
+  let correct = formatTime(hour,m);
+
+  let options = [correct];
+  while(options.length<4) {
+    let rh = Math.floor(Math.random()*12)+1;
+    let rm = randomChoice(fiveMinuteIncrements);
+    let o = formatTime(rh,rm);
+    if(!options.includes(o)) options.push(o);
+  }
+  shuffleArray(options);
+
+  return {
+    type: "matching",
+    phrase: phrase,
+    question: "Match the phrase '"+phrase+"' with the correct digital time:",
+    options: options,
+    correctIndex: options.indexOf(correct),
+    explanation: "The correct digital time for '"+phrase+"' is " + correct + "."
+  };
+}
+
+// Reverse fill-in: given HH:MM digital, type the phrase (any valid synonym accepted)
+function generateReverseFillInQuestion() {
+  let hour = Math.floor(Math.random()*12)+1;
+  let m = randomChoice(fiveMinuteIncrements);
+  let digital = formatTime(hour,m);
+  let synonyms = generateSynonyms(hour,m);
+  let explanation = "The correct phrase can be: " + synonyms.join(" or ") + ".";
+  return {
+    type: "reverse-fill-in",
+    hour: hour,
+    minutes: m,
+    digital: digital,
+    question: "Given the digital time "+digital+", type the phrase (e.g. 'quarter past 2'):",
+    explanation: explanation
+  };
+}
+
+// Generate questions
+let questions = [];
+for(let i=0; i<50; i++){ questions.push(generateMultipleChoiceQuestion(false)); }
+for(let i=0; i<20; i++){ questions.push(generateMultipleChoiceQuestion(true)); }
+for(let i=0; i<15; i++){ questions.push(generateFillInQuestion()); }
+for(let i=0; i<10; i++){ questions.push(generateMatchingQuestion()); }
+for(let i=0; i<5; i++){ questions.push(generateReverseFillInQuestion()); }
+
+shuffleArray(questions);
+
+let totalTime = 23 * 60; // 20 minutes
+let timerInterval = null;
+let currentQuestionIndex = 0;
+let score = 0;
+let playerName = "";
+let selectedMatching = null;
+
+function startQuiz() {
+  const nameInput = document.getElementById("playerName").value.trim();
+  if(!nameInput) {
+    alert("Please enter your name before starting.");
+    return;
+  }
+  playerName = nameInput;
+  document.getElementById("intro").classList.remove("active");
+  document.getElementById("quiz-area").classList.add("active");
+  showQuestion();
+  startTimer();
+}
+
+function startTimer() {
+  const timerEl = document.getElementById("timer");
+  timerInterval = setInterval(()=>{
+    if(totalTime <= 0) {
+      clearInterval(timerInterval);
+      endQuiz();
+      return;
+    }
+    totalTime--;
+    let minutes = Math.floor(totalTime/60);
+    let seconds = totalTime%60;
+    if(seconds<10) seconds = "0"+seconds;
+    timerEl.textContent = "Time: " + minutes+":"+seconds;
+  },1000);
+}
+
+function showQuestion() {
+  selectedMatching = null;
+  let q = questions[currentQuestionIndex];
+
+  // Reset UI
+  document.getElementById("feedback").classList.add("hidden");
+  document.getElementById("explanation").classList.add("hidden");
+  document.getElementById("nextBtn").classList.add("hidden");
+  document.getElementById("submitBtn").classList.remove("hidden");
+  document.getElementById("answers").classList.add("hidden");
+  document.getElementById("fill-in-wrapper").classList.add("hidden");
+  document.getElementById("matching-wrapper").classList.add("hidden");
+  document.getElementById("reverse-fill-in-wrapper").classList.add("hidden");
+  document.getElementById("answers").innerHTML = "";
+  document.getElementById("matching-options").innerHTML = "";
+  document.getElementById("fillInInput").value = ":";
+  document.getElementById("reverseFillInInput").value = "";
+
+  document.getElementById("question-count").textContent = "Question " + (currentQuestionIndex+1) + " of " + questions.length;
+  document.getElementById("question-text").textContent = q.question;
+
+  if(q.type==="multiple-choice") {
+    drawClock(q.hour, q.minutes);
+    let ansDiv = document.getElementById("answers");
+    ansDiv.classList.remove("hidden");
+    q.options.forEach((opt,i)=>{
+      let label = document.createElement("label");
+      let inp = document.createElement("input");
+      inp.type="radio";
+      inp.name="answer";
+      inp.value=i;
+      label.appendChild(inp);
+      label.appendChild(document.createTextNode(" "+opt));
+      ansDiv.appendChild(label);
+    });
+  } else if(q.type==="fill-in") {
+    drawClock(q.hour, q.minutes);
+    document.getElementById("fill-in-wrapper").classList.remove("hidden");
+  } else if(q.type==="matching") {
+    document.getElementById("clock-area").innerHTML = "";
+    document.getElementById("matching-wrapper").classList.remove("hidden");
+    q.options.forEach((opt,i)=>{
+      let divOpt = document.createElement("div");
+      divOpt.className = "matching-option";
+      divOpt.textContent = opt;
+      divOpt.setAttribute("data-value",i);
+      divOpt.onclick = ()=>selectMatchingOption(i);
+      document.getElementById("matching-options").appendChild(divOpt);
+    });
+  } else if(q.type==="reverse-fill-in") {
+    document.getElementById("clock-area").innerHTML = "";
+    document.getElementById("reverse-fill-in-wrapper").classList.remove("hidden");
+  }
+}
+
+function selectMatchingOption(i) {
+  selectedMatching = i;
+  let all = document.querySelectorAll(".matching-option");
+  all.forEach(o=>{
+    o.style.background="#fafafa";
+    o.style.border="1px solid #ddd";
+  });
+  let chosen = document.querySelector('.matching-option[data-value="'+i+'"]');
+  if(chosen) {
+    chosen.style.background="#f6e6e6";
+    chosen.style.border="1px solid #e5a5a5";
+  }
+}
+
+function drawClock(hour, minutes) {
+  let clockArea = document.getElementById("clock-area");
+  clockArea.innerHTML = "";
+  let clockDiv = document.createElement("div");
+  clockDiv.className = "clock-wrapper";
+
+  let svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("width","200");
+  svg.setAttribute("height","200");
+  svg.style.display="block";
+  svg.style.margin="auto";
+
+  let circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+  circle.setAttribute("cx","100");
+  circle.setAttribute("cy","100");
+  circle.setAttribute("r","98");
+  circle.setAttribute("stroke","black");
+  circle.setAttribute("stroke-width","2");
+  circle.setAttribute("fill","white");
+  svg.appendChild(circle);
+
+  let radius = 70;
+  for(let h=1;h<=12;h++){
+    let angle = (h * 30) - 90; 
+    let rad = angle * Math.PI/180;
+    let x = 100 + radius * Math.cos(rad);
+    let y = 100 + radius * Math.sin(rad) + 5;
+    let txt = document.createElementNS("http://www.w3.org/2000/svg","text");
+    txt.setAttribute("x",x);
+    txt.setAttribute("y",y);
+    txt.setAttribute("font-size","20");
+    txt.setAttribute("font-family","Open Sans");
+    txt.setAttribute("text-anchor","middle");
+    txt.textContent = h.toString();
+    svg.appendChild(txt);
+  }
+
+  let hAngle = ((hour%12)*30) + (minutes*0.5);
+  let mAngle = minutes*6;
+
+  let hRad = (hAngle - 90)*Math.PI/180;
+  let mRad = (mAngle - 90)*Math.PI/180;
+
+  let hx = 100 + 40 * Math.cos(hRad);
+  let hy = 100 + 40 * Math.sin(hRad);
+  let hourHandLine = document.createElementNS("http://www.w3.org/2000/svg","line");
+  hourHandLine.setAttribute("x1","100");
+  hourHandLine.setAttribute("y1","100");
+  hourHandLine.setAttribute("x2",hx);
+  hourHandLine.setAttribute("y2",hy);
+  hourHandLine.setAttribute("stroke","black");
+  hourHandLine.setAttribute("stroke-width","6");
+  hourHandLine.setAttribute("stroke-linecap","round");
+  svg.appendChild(hourHandLine);
+
+  let mx = 100 + 60 * Math.cos(mRad);
+  let my = 100 + 60 * Math.sin(mRad);
+  let minuteHandLine = document.createElementNS("http://www.w3.org/2000/svg","line");
+  minuteHandLine.setAttribute("x1","100");
+  minuteHandLine.setAttribute("y1","100");
+  minuteHandLine.setAttribute("x2",mx);
+  minuteHandLine.setAttribute("y2",my);
+  minuteHandLine.setAttribute("stroke","black");
+  minuteHandLine.setAttribute("stroke-width","4");
+  minuteHandLine.setAttribute("stroke-linecap","round");
+  svg.appendChild(minuteHandLine);
+
+  let centerDot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+  centerDot.setAttribute("cx","100");
+  centerDot.setAttribute("cy","100");
+  centerDot.setAttribute("r","3");
+  centerDot.setAttribute("fill","black");
+  svg.appendChild(centerDot);
+
+  clockDiv.appendChild(svg);
+  clockArea.appendChild(clockDiv);
+}
+
+function submitAnswer() {
+  let q = questions[currentQuestionIndex];
+  let correct = false;
+
+  if(q.type==="multiple-choice") {
+    let radios = document.querySelectorAll('input[name="answer"]');
+    let userAns = null;
+    for(let r of radios) {
+      if(r.checked) { userAns = parseInt(r.value); break; }
+    }
+    if(userAns===null) {
+      alert("Please select an answer.");
+      return;
+    }
+    correct = (userAns===q.correctIndex);
+  }
+  else if(q.type==="fill-in") {
+    let val = document.getElementById("fillInInput").value.trim();
+    correct = (val===q.correctAnswer);
+    if(!val.includes(":")) correct=false;
+  }
+  else if(q.type==="matching") {
+    if(selectedMatching===null) {
+      alert("Please select an answer.");
+      return;
+    }
+    correct = (selectedMatching===q.correctIndex);
+  }
+  else if(q.type==="reverse-fill-in") {
+    let val = document.getElementById("reverseFillInInput").value.trim().toLowerCase();
+    correct = checkSynonymMatch(val, q.hour, q.minutes);
+  }
+
+  if(correct) {
+    score +=10;
+  }
+
+  let feedbackEl = document.getElementById("feedback");
+  feedbackEl.classList.remove("hidden");
+  feedbackEl.textContent = correct ? "Correct!" : "Incorrect!";
+  feedbackEl.classList.remove("correct","incorrect");
+  feedbackEl.classList.add(correct ? "correct":"incorrect");
+
+  let explanationEl = document.getElementById("explanation");
+  explanationEl.classList.remove("hidden");
+  explanationEl.textContent = q.explanation;
+
+  document.getElementById("scoreboard").textContent = "Score: " + score;
+
+  document.getElementById("submitBtn").classList.add("hidden");
+  document.getElementById("nextBtn").classList.remove("hidden");
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  if(currentQuestionIndex>=questions.length) {
+    endQuiz();
+  } else {
+    showQuestion();
+  }
+}
+
+function endQuiz() {
+  clearInterval(timerInterval);
+  document.getElementById("quiz-area").classList.remove("active");
+  document.getElementById("result-area").classList.add("active");
+
+  let finalMsg = document.getElementById("final-message");
+  finalMsg.textContent = "Great job, " + playerName + "!";
+
+  let finalScore = document.getElementById("final-score");
+  finalScore.textContent = "Time 3: Your Score: " + score + " out of " + (questions.length*10);
+}
+</script>
+
+</body>
+</html>
